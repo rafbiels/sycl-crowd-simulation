@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
         }
     };
 
-    sycl::queue myQueue{sycl::gpu_selector(), asyncHandler};
+    sycl::queue myQueue{sycl::gpu_selector_v, asyncHandler};
 
     init(width, height, scale, delay, bgColor, wallColor, heatmapEnabled,
          actors, room, paths, argc, argv);
@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 #ifdef PROFILING_MODE
-    while (timestepCounter <= 500) {
+    while (timestepCounter <= 50) {
 #else
     while (!isQuit) {
         if (SDL_PollEvent(&event)) {
