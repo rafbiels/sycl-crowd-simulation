@@ -1,0 +1,27 @@
+diff --git a/src/main.cpp b/src/main.cpp
+index acc5fa1..09cceb1 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -134,6 +134,11 @@ void update(sycl::queue &myQueue, sycl::buffer<Actor> &actorBuf,
+             sycl::buffer<Path> &pathsBuf,
+             sycl::buffer<bool> &heatmapEnabledBuf) {
+     try {
++        constexpr static size_t wgSize{256};
++        const size_t numActors{actorBuf.size()};
++        const size_t nwg{(numActors+wgSize-1) / wgSize};
++        const sycl::nd_range<1> range{nwg*wgSize, wgSize};
++
+         myQueue.submit([&](sycl::handler &cgh) {
+             auto actorAcc =
+                 actorBuf.get_access<sycl::access::mode::read_write>(cgh);
+@@ -146,7 +151,9 @@ void update(sycl::queue &myQueue, sycl::buffer<Actor> &actorBuf,
+                 heatmapEnabledBuf.get_access<sycl::access::mode::read>(cgh);
+ 
+             cgh.parallel_for(
+-                sycl::range<1>{actorAcc.size()}, [=](sycl::id<1> index) {
++                range, [=](sycl::nd_item<1> item) {
++                    const size_t index{item.get_global_linear_id()};
++                    if (index>=numActors) {return;}
+                     if (!actorAcc[index].getAtDestination()) {
+                         differentialEq(index, actorAcc, wallsAcc, pathsAcc,
+                                        heatmapEnabledAcc);

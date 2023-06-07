@@ -1,0 +1,22 @@
+diff --git a/external/DifferentialEq.cpp b/external/DifferentialEq.cpp
+index 0c50639..6a66277 100644
+--- a/external/DifferentialEq.cpp
++++ b/external/DifferentialEq.cpp
+@@ -87,12 +87,11 @@ SYCL_EXTERNAL void differentialEq(
+     for (int x = 0; x < actors.size(); x++) {
+         Actor neighbour = actors[x];
+ 
+-        bool bBoxFlag =
+-            std::any_of(neighbourBoxes.begin(), neighbourBoxes.end(),
+-                        [neighbour](std::array<int, 2> i) {
+-                            return i[0] == neighbour.getBBox()[0] &&
+-                                   i[1] == neighbour.getBBox()[1];
+-                        });
++        bool bBoxFlag{false};
++        for (unsigned int iBox{0}; iBox<9; ++iBox) {
++            bBoxFlag |= (neighbourBoxes[iBox][0]==neighbour.getBBox()[0] &&
++                         neighbourBoxes[iBox][1]==neighbour.getBBox()[1]);
++        }
+ 
+         if (actorIndex != x && !neighbour.getAtDestination() && bBoxFlag) {
+             sycl::float2 currentToNeighbour = pos - neighbour.getPos();
